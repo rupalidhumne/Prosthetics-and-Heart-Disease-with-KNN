@@ -1,6 +1,6 @@
 import java.io.File;
 import java.util.*;
-public class ksim3  
+public class ksimcorr  
 {
    
    static ArrayList<Instancem> iterations;
@@ -14,10 +14,10 @@ public class ksim3
    static final int nCoords=30625;
    static final int nCoordsSize=175;
    
-   static final int nActions = 2;
-   static final int nIterations =5 ;
+   static final int nActions = 4;
+   static final int nIterations = 1;
 
-   static int nFrames=150; //# frames = # files
+   static int nFrames; //# frames = # files
    
    static final String dataFile="Motion";
    
@@ -25,7 +25,7 @@ public class ksim3
    public static void main(String[] args) throws Exception
    {
     
-      //System.out.println("Is running");
+      System.out.println("Is running");
       ArrayList<Coord> coordArray = new ArrayList<Coord>();
       int r=0; 
       int c=0;
@@ -49,17 +49,26 @@ public class ksim3
       iterations = new ArrayList<Instancem>(); //iterations
       for(int j=0; j<nActions; j++) 
       {
+        
+     	if(j==0)
+     		nFrames =  17;
+     	if(j==1)
+     		nFrames = 16;
+     	if(j==2)
+     		nFrames= 21;
+     	if(j==3)
+     		nFrames=18;
+         	
          int start =0;
          int end=nFrames;
-
          for(int x=0; x<nIterations; x++) 
          {
             int f=0;
             Double[][][] matrix = new Double[nFrames][nCoordsSize][nCoordsSize]; 
             for(int a=start; a<end; a++) 
             {
-                
-               String filename= "/Users/rdhumne/Documents/GMUInternship2015/" + dataFile + (j+1) + "_" + (a+1) + ".txt"; //getting textfile //add NewMotions/
+                System.out.println("j: "+ j + " a: " + a + "nFrames:" +nFrames);
+               String filename= "/Users/rdhumne/Documents/GMUInternship2015/NewMotions/" + dataFile + (j+1) + "_" + (a+1) + ".txt"; //getting textfile
                System.out.println(filename);
                int c1=0; //col in matrix
                int r1=0; //row
@@ -73,7 +82,8 @@ public class ksim3
                      {
                         if(coordArray.get(numCor).getRow()==z && coordArray.get(numCor).getCol()==b) //if at a coordinate that is in the coordArray (randomly generated coordinates before)
                         {                                                    
-                           matrix[f][r1][c1]= infile.nextDouble(); //store the coordinate
+                           //System.out.println("f:" +f + " r1: " + r1 + " c1: " +c1);
+                        	matrix[f][r1][c1]= infile.nextDouble(); //store the coordinate
                            c1++; //column in 3d matrix
                            numCor++;
                            if(c1>=nCoordsSize) //on last col in matrix (which is nCoordsSize by nCoordsSize)
@@ -220,19 +230,19 @@ public class ksim3
    
        ArrayList<Double> corrs = new ArrayList<Double>();
       ArrayList<Integer> ccs = new ArrayList<Integer>(); //classes
-      Double[][] avg1 =test.task3();
+      Double[][] avg1 =test.task3(test.getS());
       for(int x=0; x<train.size(); x++)
       {
-         Double[][] avg2= train.get(x).task3();
+         Double[][] avg2= train.get(x).task3(train.get(x).getS());
          double d = correlation(avg1, avg2);
          corrs.add(d);
-         System.out.println("Correlation Coefficient:"+d);
+         System.out.println("correlation value:" + d);
          ccs.add(train.get(x).getS()); //class corresponding to correlation value of test and train x
       }
       sort(corrs,ccs);
       //ArrayList<Double> kcorrs = new ArrayList<Double>();
       ArrayList<Integer> kccs = new ArrayList<Integer>(); 
-      for(int x=0; x<5; x++)
+      for(int x=0; x<3; x++)
       {
          //kcorrs.add(corrs.get(x));
          kccs.add(ccs.get(x));

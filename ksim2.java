@@ -1,60 +1,191 @@
-import java.io.*;
+import java.io.File; //try mixing stuff up tomorrow, will have to change the precision0[] things
 import java.util.*;
-import java.text.DecimalFormat;
-public class ksim2
+/*
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+*/
+public class ksim2 //extends MyThread //iterations is not the same both times
 {
-     static DecimalFormat d = new DecimalFormat("0.00");
-   public static void main(String[] args) throws FileNotFoundException
+	//public ksim2( int f, int s, int e, int ith, int jth) 
+	//{
+		//super(f, s, e, ith, jth);
+	//}
+   static ArrayList<Instancem> iterations;
+   public static void main(String[] args) throws Exception
    {
-     long startTime = System.nanoTime();
-      Scanner kb = new Scanner(System.in);
-      System.out.println("Enter number of motions");
-      int m = kb.nextInt();
-      System.out.println("Enter images per motion");
+	   double startTime = System.nanoTime();
+      
+      Scanner kb = new Scanner(System.in); //stops at motion1_657
+      System.out.println("Enter images per iteration");
       int i = kb.nextInt();
-      ArrayList<Instancem> motions = new ArrayList<Instancem>();
-      for(int x=0; x<m; x++)
+      iterations = new ArrayList<Instancem>(); //iterations
+       //List<Future<Instancem>> list = new ArrayList<Future<Instancem>>();
+      for(int j=0; j<2; j++)
       {
-         Double[][][] matrix = new Double[i][640][480]; //640 row 480 col i times
-         for(int a=0; a<i; a++)
+         int start =0;
+         int end = i;
+         //ExecutorService executor = Executors.newFixedThreadPool(5); //5 motions at a time
+         for(int x=0; x<5; x++)
          {
-            String filename = "Motion"+(x+1)+ "_" + (a+1)+".txt";
-            Scanner infile = new Scanner(new File(filename));
-            for(int r=0; r<640; r++)
+            int f=0;
+            Double[][][] matrix = new Double[i][175][175]; 
+            for(int a=start; a<end; a++)
             {
-               for(int c=0;c<480; c++)
+               String filename= "/Users/rdhumne/Documents/GMUInternship2015/Motion" + (j+1) + "_" + (a+1) + ".txt";
+               System.out.println(filename);
+               Scanner infile = new Scanner(new File(filename));
+               for(int x1=0; x1<152; x1++) //152
                {
-                  matrix[a][r][c]=infile.nextDouble();
+                  infile.nextLine();
                }
-            }       
-         }
-         Instancem instance = new Instancem(matrix, x);     
-         motions.add(instance);
+               for(int x1=0; x1<232; x1++) //232
+               {
+                  infile.nextDouble();
+                  
+               }
+                  
+               for(int r=0; r<175; r++) //175
+               {
+                  for(int c=0;c<175; c++)
+                  {
+                     matrix[f][r][c]=infile.nextDouble();
+                       	 
+                  }
+                  for(int d=0; d<(232+233); d++) //or else try 232+233
+                  {
+                     infile.nextDouble();
+                  } 
+                                            //{
+                   	  //infile.nextDouble();
+                     //}
+               } 
+               f++;
+               infile.close();
+            }
+            start+=140;
+            end+=140;
+          //Callable<Instancem> c = new MyThread(f,start,end,i,j);
+         // FutureTask futuretask = new FutureTask(c);
+          //ExecutorService executor = Executors.newFixedThreadPool(5);
+          //executor.submit(c);
+         //try
+          //{
+         	 //@SuppressWarnings("unchecked")
+         	
+         	//Instancem instance= ((Future<Instancem>) futuretask).get(); //futuretask cannot be cast to javas
+         	 //System.out.println(instance.toString());
+         	 //iterations.add(instance);
+          //}
+         // catch(Exception e)
+          //{
+         	//e.printStackTrace(); 
+          //}
+            Instancem I = new Instancem(matrix,j);
+            	 //I.toString2();
+            	 
+            iterations.add(I);
+            start+=i;;
+            end +=i; 
+         
+         
+         } 
+      } 
+      kb.close();
+      int swap = (int)(Math.random()*2+1);
+      for(int x=0; x<swap; x++)  
+      {
+         Collections.swap(iterations, (int)(Math.random()*10), (int)(Math.random()*10));
       }
-     report(motions);
-     long endTime = System.nanoTime(); // end timer
-    long duration = endTime - startTime;
-    System.out.println("Runtime:" + duration);
+      if(iterations!=null)
+      {
+         report(iterations);
+      }
+      else
+      {
+         System.out.println("Got here too fast");
+      }
+      double endTime = System.nanoTime(); // end timer
+      double duration = endTime - startTime;
+      System.out.println("Runtime: " + duration);
    }
-   public static void report(ArrayList<Instancem> motions)
+      
+
+   public static void report(ArrayList<Instancem> iterations)
    {
-       double[] accuracy = new double[10]; 
+      
+      double[] accuracy = new double[10]; 
+      /*
+      double[] precision0 = new double[5]; 
+      double[] precision1 = new double[5]; 
+      double[] recall0 = new double[5]; 
+      double[] recall1 = new double[5]; 
+      */
       ArrayList<ArrayList<Double>> precision = new ArrayList<ArrayList<Double>>();
       ArrayList<ArrayList<Double>> recall = new ArrayList<ArrayList<Double>>();
+      //int w=0;
+      //int e=0;
       for(int x=0; x<10; x++)
       {
-         int[][] matrix = validate(motions);
+         int[][] matrix = validate(iterations,x);
          accuracy[x]=accuracy(matrix);
          precision.add(x,pres(matrix));
          recall.add(x,recall(matrix));          
       }
+      /*
+      for(int x=0; x<10; x++)
+      {
+         int[][] matrix = validate(iterations,x);
+         accuracy[x]=accuracy(matrix);
+         if(iterations.get(x).getS()==0)
+         {
+        	 precision0[e]=pres(matrix,0);
+        	 recall0[e]=recall(matrix,0); 
+        	 e++;
+         }
+         else
+         {
+        	 precision1[w]=pres(matrix,1);
+             recall1[w]=recall(matrix,1); 
+             w++;
+         }
+      }
+      */
       double acsum=0;
       for(int x=0; x<accuracy.length; x++)
       {
          acsum+=accuracy[x];
       }
       double totaccuracy=(acsum/accuracy.length)*100;
-      System.out.println("Accuracy:"+ d.format(totaccuracy));
+      System.out.println("Accuracy:"+ totaccuracy);
+      /*
+      double sumpres0 = 0; //sum of precision arrays
+      double sumpres1 =0;
+      for(int x=0; x<5; x++)
+      {
+         sumpres0+=precision0[x];      
+      }
+      System.out.println("Precision for 0 is:"+(sumpres0/precision0.length));
+      for(int x=0; x<5; x++)
+      {
+         sumpres1+=precision1[x];      
+      }
+      System.out.println("Precision for 1 is:"+(sumpres1/precision1.length));
+      
+      double sumRec0 = 0; //sum of precision arrays
+      double sumRec1 =0;
+      for(int x=0; x<5; x++)
+      {
+         sumRec0+=recall0[x];      
+      }
+      System.out.println("Recall for 0 is:"+(sumRec0/recall0.length));
+      for(int x=0; x<5; x++)
+      {
+         sumRec1+=recall1[x];      
+      }
+      System.out.println("Recall for 1 is:"+(sumRec1/recall1.length));    
+      */
       double[] sumpres = new double[2]; //sum of precision arrays
       for(int x=0; x<10; x++)
       {
@@ -66,7 +197,7 @@ public class ksim2
       }
       for(int x=0; x<sumpres.length; x++)
       {
-         System.out.println("Precision for classification #" + (x+1) + " : " + d.format(sumpres[x]/10));
+         System.out.println("Precision for classification #" + (x+1) + " : " + (sumpres[x]/10));
       }
       double[] sumrecall = new double[2]; //sum of precision arrays
       for(int x=0; x<10; x++)
@@ -80,36 +211,33 @@ public class ksim2
       System.out.println();
       for(int x=0; x<sumrecall.length; x++)
       {
-         System.out.println("Recall for classification #" +(x+1)+ ": " + d.format(sumrecall[x]/10));
+         System.out.println("Recall for classification #" +(x+1)+ ": " + (sumrecall[x]/10));
       }
-   
-     
    }
-   public static int[][] validate(ArrayList<Instancem> motions)
+   public static int[][] validate(ArrayList<Instancem> iterations, int x)
    {
       int matrix[][]=new int[2][2];
-      for(int x= 0; x<motions.size(); x++)
+      Instancem test = iterations.get(x);
+      int c= iterations.get(x).getS(); 
+      ArrayList<Instancem> train = new ArrayList<Instancem>();
+      for(int a=0; a<iterations.size(); a++)
       {
-         Instancem test = motions.get(x);
-         int c= motions.get(x).getS();
-         ArrayList<Instancem> train = new ArrayList<Instancem>();
-         for(int a=0; a<motions.size(); a++)
+         if(a!=x)
          {
-            if(a!=x)
-            {
-               train.add(motions.get(a));
-            }
-                        
+            train.add(iterations.get(a));
          }
-         int nn = nearestNeighbor(test, train);
-         matrix[c][nn]++;
+                        
+      }
+      int nn = nearestNeighbor(test, train);
+      matrix[c][nn]++;
                 //finish       
-      } 
-     return matrix;
+      
+      
+      return matrix;
    }
    public static int nearestNeighbor(Instancem test, ArrayList<Instancem> train)
    {
-      Double[][][] mat = test.getmat();
+   
       ArrayList<Double> corrs = new ArrayList<Double>();
       ArrayList<Integer> ccs = new ArrayList<Integer>(); //classes
       Double[][] avg1 =test.task2();
@@ -121,14 +249,14 @@ public class ksim2
          ccs.add(train.get(x).getS()); //class corresponding to correlation value of test and train x
       }
       sort(corrs,ccs);
-      ArrayList<Double> kcorrs = new ArrayList<Double>();
+      //ArrayList<Double> kcorrs = new ArrayList<Double>();
       ArrayList<Integer> kccs = new ArrayList<Integer>(); 
       for(int x=0; x<5; x++)
       {
-         kcorrs.add(corrs.get(x));
+         //kcorrs.add(corrs.get(x));
          kccs.add(ccs.get(x));
       }
-     int m= mode(kccs);  
+      int m= mode(kccs);  
       return m;
    
    }
@@ -137,24 +265,24 @@ public class ksim2
       int oneval=0;
       int twoval=0;
       for(int x=0; x<arr.size(); x++)
+      {
+         if(arr.get(x)==0)
          {
-            if(arr.get(x)==0)
-               {
-                  oneval++;
-               }
-            else
-               {
-                  twoval++;
-               }
+            oneval++;
          }
+         else
+         {
+            twoval++;
+         }
+      }
       if(oneval>twoval)
-         {
-            return 0;
-         }
+      {
+         return 0;
+      }
       else
-         {
-            return 1;
-         }
+      {
+         return 1;
+      }
    }                           
          
    public static void sort(ArrayList<Double>corrs, ArrayList<Integer> ccs)
@@ -183,11 +311,11 @@ public class ksim2
       double pivot=corrs.get(first);
       while(first<=last)
       {
-         if(corrs.get(first)<=pivot) //checks to see if its on the right side
+         if(corrs.get(first)>=pivot) //checks to see if its on the right side
          {
             first++;  //like a for loop, it goes to the next cell
          }
-         else if(corrs.get(last)>=pivot)
+         else if(corrs.get(last)<=pivot)
          {
             last--;             //decrements the for loop or cell count thing
          }
@@ -202,17 +330,17 @@ public class ksim2
       splitPt=last;
       return splitPt;
    }
- public static double correlation(Double[][] avg1,Double[][] avg2)
+   public static double correlation(Double[][] avg1,Double[][] avg2)
    {
       return corr2(avg1, avg2);
    }
-   public static double corr2(Double[][] a, Double[][] b)
+   public static double corr2(Double[][] a,Double[][] b)
    {
       double meanA=mean(a);
       double meanB=mean(b);
       double top = top(meanA, meanB, a, b);
       double bottom = bottom(meanA, meanB, a, b);  
-      return top/bottom; 
+      return Math.abs(top/bottom); 
    }
    public static double bottom(double ma, double mb, Double[][] a, Double[][] b)
    {
@@ -229,7 +357,7 @@ public class ksim2
       {
          for(int y=0; y<a[0].length; y++)
          {
-            sumB+=Math.pow((a[x][y]-mb),2);
+            sumB+=Math.pow((b[x][y]-mb),2);
          }
       }
       return Math.sqrt(sumA*sumB);
@@ -254,12 +382,12 @@ public class ksim2
       {
          for(int n=0; n<a[0].length; n++)
          {
-            top+= (a[m][n]-ma)*(b[m][n]*mb);
+            top+= (a[m][n]-ma)*(b[m][n]-mb);
          }
       }
       return top;
    }  
- public static double accuracy(int[][]matrix)
+   public static double accuracy(int[][]matrix)
    {
       double accuracy=0.0;
       double total=matrixsum(matrix);
@@ -267,6 +395,60 @@ public class ksim2
       accuracy = tp/total;
       return accuracy;
    }
+   /*
+   public static double pres(int[][] matrix,int x)
+   {
+      //double[] thing = new double[5];      
+      double tp = tp(matrix);
+      double fp = fp(matrix,x);
+      double precision =0;
+      if(tp==0&fp==0)
+      {
+         precision=0;
+      }
+      else
+      {   
+         precision = (tp/(fp+tp))*100;
+      }   
+      return precision;    
+   } 
+   public static double recall(int[][]matrix,int x)
+   {          
+      double tp = tp(matrix);
+      double fn = fn(matrix,x);
+      double recall = (tp/(fn+tp))*100;
+          
+      
+      return recall;
+   }    
+
+      
+   public static double fp(int[][]matrix,int x) //BLAH
+   {
+      double sum =0.0;
+      //System.out.println(matrix.length);
+      for(int y=0; y<matrix.length; y++)
+      {
+         if(y!=x)
+         {
+            sum+=matrix[y][x];
+         }
+      }
+      return sum;
+   }                  
+   public static double fn(int matrix[][], int x) //BLAH
+   {
+      double sum =0.0;
+      for(int y=0; y<matrix[0].length; y++)
+      {
+         if(y!=x)
+         {
+            sum+=matrix[x][y];
+         }
+      }
+      return sum;
+   }               
+   */
    public static ArrayList<Double> pres(int[][] matrix)
    {
       ArrayList<Double> thing = new ArrayList<Double>();
@@ -274,8 +456,19 @@ public class ksim2
       {
          double tp = tp(matrix);
          double fp = fp(matrix,x);
-         double precision = (tp/(fp+tp))*100;
-         thing.add(x,precision);
+         if(tp==0 && fp==0)
+         {
+            thing.add(x,100.0);
+         }
+         else if(tp==1&& fp==0)
+         {
+            thing.add(x,100.0);
+         }
+         else
+         {
+            double precision = (tp/(fp+tp))*100;
+            thing.add(x,precision);
+         }
       }
       return thing;    
    } 
@@ -286,8 +479,20 @@ public class ksim2
       {
          double tp = tp(matrix);
          double fn = fn(matrix,x);
-         double precision = (tp/(fn+tp))*100;
-         thing.add(x,precision); 
+         if(tp==0 && fn==0)
+         {
+            thing.add(x,100.0);  
+         }
+         else if(tp==1&& fn==0)
+         {
+            thing.add(x,100.0);
+         }
+         else
+         {
+            double recall = (tp/(fn+tp))*100;
+            thing.add(x,recall); 
+         }
+      
       }
       return thing;
    }    
@@ -320,6 +525,7 @@ public class ksim2
    }               
             
 
+
    public static double matrixsum(int[][] matrix)
    {
       double sum = 0.0;
@@ -348,7 +554,5 @@ public class ksim2
       return sum;
    }   
               
-
-         
-
 }      
+

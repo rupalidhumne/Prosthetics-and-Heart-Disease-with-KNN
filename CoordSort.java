@@ -1,5 +1,4 @@
-import java.util.*; 
-
+ 
 public class CoordSort
 {
 	public class Coord
@@ -17,42 +16,25 @@ public class CoordSort
 			row = rowIn;
 			col = colIn;
 		}
+		public int getRow()
+		{
+			return row;
+		}
+		public int getCol()
+		{
+			return col;
+		}
+		public int compareTo(Coord c)
+		{
+			if(c.getRow()==row && c.getCol()==col)
+			{
+				return 0;
+			}
+			else 
+				return -1;
+		}
 	}
-	
-	public static void print(Coord[] coordArray, int nCoords)
-	{
-		// prints coordinate array by row
 
-	    for(int i=0; i<nCoords;)
-	    {
-	        int currentRow = coordArray[i].row;
-
-	        int nCols=1;
-
-	        for(int j=i+1; j<nCoords; j++)
-
-	            if( coordArray[j].row == currentRow ) nCols++;
-	            else break;
-	        
-			System.out.println();
-			System.out.printf("row %d:\t", currentRow);
-
-	        for(int j=i; j < i+nCols; j++)
-	        {   
-	        	System.out.printf("%d ", coordArray[j].col);
-	        	
-	        	if( coordArray[j].row != currentRow ) // check for error
-	        	{
-	    			System.out.println();
-	    			System.out.printf("ERROR: coordArray[%d].row %d != currentRow %d", j, coordArray[j].row, currentRow);
-	    			System.out.println();
-	        	}
-	        }
-	        
-	        i += nCols;
-	    }
-	}
-	
 	public static void sort(Coord[] coordArray, int nCoords)
 	{
 		// sorts coordinate array by rows and columns
@@ -101,26 +83,5 @@ public class CoordSort
 		
 	}
 	
-	public static void main(String[] args)
-	{
-		CoordSort cs = new CoordSort();
-
-		int nCoords = 20;
-		
-		Coord coordArray[] = new Coord[nCoords];
-		
-		Random rand = new Random(); 
-		
-	    for(int i=0; i<nCoords; i++)
-
-	        coordArray[i] = cs.new Coord(rand.nextInt(4), rand.nextInt(4));
-	    
-	    print(coordArray, nCoords);
 	
-	    sort(coordArray, nCoords);
-
-		System.out.println();
-		
-		print(coordArray, nCoords);
-	}
 }

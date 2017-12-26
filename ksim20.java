@@ -1,31 +1,29 @@
 import java.io.File;
 import java.util.*;
-public class ksim3  
+public class ksim20 
 {
    
    static ArrayList<Instancem> iterations;
   
-   
-   // Real Values
-   //# files = nFingers * nMotions * nFrames
    static final int nRows = 480;
    static final int nCols= 640;
    
-   static final int nCoords=30625;
-   static final int nCoordsSize=175;
+   static final int nCoords=46225;
+   static final int nCoordsSize=215;
    
-   static final int nActions = 2;
+   static final int nActions = 4;
    static final int nIterations =5 ;
 
-   static int nFrames=150; //# frames = # files
+   static int nFrames=22; //# frames = # files
    
    static final String dataFile="Motion";
+
+   static String filename;
+   static File file;
    
    
    public static void main(String[] args) throws Exception
    {
-    
-      //System.out.println("Is running");
       ArrayList<Coord> coordArray = new ArrayList<Coord>();
       int r=0; 
       int c=0;
@@ -44,22 +42,22 @@ public class ksim3
             
       }
       cordSort(coordArray, coordArray.size());
-      Scanner kb = new Scanner(System.in); 
+      
       double startTime = System.nanoTime();
       iterations = new ArrayList<Instancem>(); //iterations
+      
       for(int j=0; j<nActions; j++) 
-      {
-         int start =0;
-         int end=nFrames;
-
+      {    	 
          for(int x=0; x<nIterations; x++) 
          {
-            int f=0;
+            
             Double[][][] matrix = new Double[nFrames][nCoordsSize][nCoordsSize]; 
-            for(int a=start; a<end; a++) 
-            {
-                
-               String filename= "/Users/rdhumne/Documents/GMUInternship2015/" + dataFile + (j+1) + "_" + (a+1) + ".txt"; //getting textfile //add NewMotions/
+            int a=0;
+            filename= "/Users/rdhumne/Documents/GMUInternship2015/NewMotions/" + dataFile + ((5*j)+(x+1)) + "_" + (a+1) + ".txt"; //getting textfile //add NewMotions/
+            
+            file = new File(filename);
+            while(file.exists() && !file.isDirectory()) 
+            { 
                System.out.println(filename);
                int c1=0; //col in matrix
                int r1=0; //row
@@ -73,7 +71,7 @@ public class ksim3
                      {
                         if(coordArray.get(numCor).getRow()==z && coordArray.get(numCor).getCol()==b) //if at a coordinate that is in the coordArray (randomly generated coordinates before)
                         {                                                    
-                           matrix[f][r1][c1]= infile.nextDouble(); //store the coordinate
+                           matrix[a][r1][c1]= infile.nextDouble(); //store the coordinate
                            c1++; //column in 3d matrix
                            numCor++;
                            if(c1>=nCoordsSize) //on last col in matrix (which is nCoordsSize by nCoordsSize)
@@ -89,26 +87,20 @@ public class ksim3
                      }
                   }               
                }
-               f++;
                infile.close();
+               a++;
+             filename= "/Users/rdhumne/Documents/GMUInternship2015/NewMotions/" + dataFile + ((5*j)+(x+1)) + "_" + (a+1) + ".txt"; //getting textfile //add NewMotions/
+             file = new File(filename); 
             } 
-             	 	
             Instancem I = new Instancem(matrix,j);
-          
             iterations.add(I);
-            start+=nFrames;
-            end +=nFrames; 
+
+
          }
       } 
-      kb.close();
-      if(iterations!=null)
-      {
-         report(iterations);
-      }
-      else
-      {
-         System.out.println("Got here too fast");
-      }
+
+      report(iterations);
+
       double endTime = System.nanoTime(); // end timer
       double duration = endTime - startTime;
       System.out.println("Runtime: " + duration);
@@ -117,7 +109,8 @@ public class ksim3
    }
    public static int[][] validate(ArrayList<Instancem> iterations, int x)
    {
-      int matrix[][]=new int[2][2];
+      int matrix[][]=new int[4][4]; 
+
       Instancem test = iterations.get(x);
       int c= iterations.get(x).getS(); 
       ArrayList<Instancem> train = new ArrayList<Instancem>();
@@ -131,9 +124,10 @@ public class ksim3
       }
       int nn = nearestNeighbor(test, train);
       //Print Time out here
+
       matrix[c][nn]++;
                 //finish       
-      
+
       
       return matrix;
    }
@@ -142,43 +136,19 @@ public class ksim3
   public static void report(ArrayList<Instancem> iterations)
    {
       
-      double[] accuracy = new double[10]; 
-      /*
-      double[] precision0 = new double[5]; 
-      double[] precision1 = new double[5]; 
-      double[] recall0 = new double[5]; 
-      double[] recall1 = new double[5]; 
-      */
+      double[] accuracy = new double[20]; 
+
       ArrayList<ArrayList<Double>> precision = new ArrayList<ArrayList<Double>>();
       ArrayList<ArrayList<Double>> recall = new ArrayList<ArrayList<Double>>();
-      //int w=0;
-      //int e=0;
-      for(int x=0; x<10; x++)
+ 
+      for(int x=0; x<accuracy.length; x++)
       {
          int[][] matrix = validate(iterations,x);
          accuracy[x]=accuracy(matrix);
          precision.add(x,pres(matrix));
          recall.add(x,recall(matrix));          
       }
-      /*
-      for(int x=0; x<10; x++)
-      {
-         int[][] matrix = validate(iterations,x);
-         accuracy[x]=accuracy(matrix);
-         if(iterations.get(x).getS()==0)
-         {
-        	 precision0[e]=pres(matrix,0);
-        	 recall0[e]=recall(matrix,0); 
-        	 e++;
-         }
-         else
-         {
-        	 precision1[w]=pres(matrix,1);
-             recall1[w]=recall(matrix,1); 
-             w++;
-         }
-      }
-      */
+     
       double acsum=0;
       for(int x=0; x<accuracy.length; x++)
       {
@@ -187,8 +157,8 @@ public class ksim3
       double totaccuracy=(acsum/accuracy.length)*100;
       System.out.println("Accuracy:"+ totaccuracy);
 
-      double[] sumpres = new double[2]; //sum of precision arrays
-      for(int x=0; x<10; x++)
+      double[] sumpres = new double[4]; //sum of precision arrays
+      for(int x=0; x<20; x++)
       {
          ArrayList<Double> section = precision.get(x);
          for(int y=0; y<section.size(); y++)
@@ -198,10 +168,10 @@ public class ksim3
       }
       for(int x=0; x<sumpres.length; x++)
       {
-         System.out.println("Precision for classification #" + (x+1) + " : " + (sumpres[x]/10));
+         System.out.println("Precision for classification #" + (x+1) + " : " + (sumpres[x]/20));
       }
-      double[] sumrecall = new double[2]; //sum of precision arrays
-      for(int x=0; x<10; x++)
+      double[] sumrecall = new double[4]; //sum of precision arrays
+      for(int x=0; x<20; x++)
       {
          ArrayList<Double> section = recall.get(x);
          for(int y=0; y<section.size(); y++)
@@ -212,7 +182,7 @@ public class ksim3
       System.out.println();
       for(int x=0; x<sumrecall.length; x++)
       {
-         System.out.println("Recall for classification #" +(x+1)+ ": " + (sumrecall[x]/10));
+         System.out.println("Recall for classification #" +(x+1)+ ": " + (sumrecall[x]/20));
       }
    }
    public static int nearestNeighbor(Instancem test, ArrayList<Instancem> train)
@@ -226,15 +196,12 @@ public class ksim3
          Double[][] avg2= train.get(x).task3();
          double d = correlation(avg1, avg2);
          corrs.add(d);
-         System.out.println("Correlation Coefficient:"+d);
          ccs.add(train.get(x).getS()); //class corresponding to correlation value of test and train x
       }
       sort(corrs,ccs);
-      //ArrayList<Double> kcorrs = new ArrayList<Double>();
       ArrayList<Integer> kccs = new ArrayList<Integer>(); 
-      for(int x=0; x<5; x++)
+      for(int x=0; x<3; x++)
       {
-         //kcorrs.add(corrs.get(x));
          kccs.add(ccs.get(x));
       }
       int m= mode(kccs);  
@@ -357,27 +324,21 @@ public class ksim3
 
   public static int mode(ArrayList<Integer> arr)
    {
-      int oneval=0;
-      int twoval=0;
-      for(int x=0; x<arr.size(); x++)
+     int freq[] = new int[4]; 
+     for(int x=0; x<arr.size(); x++)
       {
-         if(arr.get(x)==0)
-         {
-            oneval++;
-         }
-         else
-         {
-            twoval++;
-         }
+         int i = arr.get(x);
+         freq[i]++;
       }
-      if(oneval>twoval)
+    int max=0;
+    for(int x=1; x<freq.length; x++)
       {
-         return 0;
+         if(freq[max]<freq[x])
+            {
+               max=x;
+            }
       }
-      else
-      {
-         return 1;
-      }
+      return max;         
    }                           
          
    public static void sort(ArrayList<Double>corrs, ArrayList<Integer> ccs)
@@ -532,4 +493,5 @@ public class ksim3
    }   
               
 }      
+
 

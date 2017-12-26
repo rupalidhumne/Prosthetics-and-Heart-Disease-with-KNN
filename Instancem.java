@@ -1,197 +1,203 @@
-import java.io.*;
 import java.util.*;
-import java.text.DecimalFormat;
 public class Instancem
 {
    Double[][][] motion;
-   int finger;
+   int action;
+   /*
+   static final int nRows = 3; //rows of actual matrix
+   static final int nCols= 3; //actual matrix
+   static final int nCoords=9;
+   static final int nCoordsSize=3; //frames
+   static final int nFrameDiff=1; 
+   */
+   static final int nRows = 480; //rows of actual matrix for task1
+   static final int nCols= 640; //actual matrix for task1
+   static final int nCoordsSize=175; 
+   static int nFrameDiff=27; 
    
-   public Instancem(Double[][][] m,int c )
+   public Instancem(Double[][][] m,int c)
       {
          motion=m;
-         finger=c;
+         action=c;
       }
+   /*
    public Double[][] task1() //one sequence of 1 imgs
    {
      Double[][][] mat1 = getmat();
       ArrayList<Double[][]> diff = new ArrayList<Double[][]>();
-      for(int z=0; z<149; z++)
+      for(int z=0; z<nFrameDiff; z++)
       {
-         Double[][] difference = new Double[640][480];
-         for(int x=0; x<640; x++)
+         Double[][] difference = new Double[nRows][nCols];
+         for(int x=0; x<nRows; x++)
          {
-            for(int y=0; y<480; y++)
+            for(int y=0; y<nCols; y++)
             {
-               difference[x][y]=mat1[z][x][y]-mat1[z+1][x][y];
+               difference[x][y]=Math.abs(mat1[z+1][x][y]-mat1[z][x][y]);
             }
          }
          diff.add(difference);
       }
-      Double[][] avgd = new Double[640][480];
-      for(int r=0; r<640; r++)
+      Double[][] avgd = new Double[nRows][nCols];
+      for(int r=0; r<nRows; r++)
       {
-         for(int c=0; c<480; c++)
+         for(int c=0; c<nCols; c++)
          {
             double sum = 0;
-            for(int i=0; i<149; i++)
+            for(int i=0; i<nFrameDiff; i++)
             {
                Double[][] matrix = diff.get(i);
                sum+=matrix[r][c];
             }
-            double d = sum/149.0;
-            double l = Math.round(d);
-            avgd[r][c]=l;   
+            avgd[r][c]=(sum/nFrameDiff);   
          }
-      } 
-      /*
-      int[][] bw = new int[10][10]  
-      int ri = 64; 
-      int rc = 48; 
-      int coeff = 1; 
-      int bwr, bwc;
-      for(int r=0; r<640; r++)
-      {
-    	  for(int c=0; c<480; c++)
-    	  {
-    		  bwc+=rc*k;
-    		  bwr+= ri*k;
-    		  for(int h=0; h<bwr; h++)
-    		  {
-    			  for(int u=0; u<bwc; u++)
-    			  {
-    				  
-    			  }
-    		  }
-    	  }
-      }
-     */
+      }   
+                           
       return avgd;
    } 
-   /*
+   */
    public Double[][] task2()
    {
-      Double[][][] mat1 = getmat();
-      ArrayList<Double[][]> diff = new ArrayList<Double[][]>();
-      ArrayList<Double[][]> sections = new ArrayList<Double[][]>();      
-      for(int z=0; z<150; z++) 
-      {
-         Double[][] section = new Double[175][175];
-         fill(section,mat1,z);
-         sections.add(section);
-      }
+	   Double[][][] mat1 = getmat();
+	      ArrayList<Double[][]> diff = new ArrayList<Double[][]>();
+
+	      int z=0;
+	      int actualDiffFrames=0; //x actual frames
+	      while(mat1[z+1][0][0]!=null)
+	      {
+	    	  actualDiffFrames++;
+	    	  Double[][] difference = new Double[nRows][nCols];
+
+	         for(int x=0; x<nRows; x++)
+	         {
+	            for(int y=0; y<nCols; y++)
+	            {
+	            	//System.out.println("First: " + mat1[z+1][x][y]);
+	            	//System.out.println("Second: " + mat1[z][x][y]);
+	            	difference[x][y]=Math.abs(mat1[z+1][x][y]-mat1[z][x][y]);
+	            }
+	         }
+	         diff.add(difference);
+	        z++; 
+	      }
+	      Double[][] avgd = new Double[nRows][nCols];
+	      for(int r=0; r<nRows; r++)
+	      {
+	         for(int c=0; c<nCols; c++)
+	         {
+	            double sum = 0;
+	            for(int i=0; i<actualDiffFrames; i++)
+	            {
+	               Double[][] matrix = diff.get(i);
+	               sum+=matrix[r][c];
+	            }
+	             avgd[r][c]=sum/actualDiffFrames;
+	         }
+	      }   
+	       
+	      Double[][] resized = new Double[48][64]; //go 10 across and 10 down each time
+	       int startx=0, starty=0;
+	       int x=10, y=10;
+	       for(int r=0; r<resized.length; r++)
+	       {
+	    	   for(int c=0; c<resized[0].length; c++)
+	    	   {
+	    		  //System.out.println("c:"+ c);
+	    		   double sum=0.0;
+	    		   for(int r1=startx; r1<x; r1++)
+	    		   {
+	    			   for(int c1=starty; c1<y; c1++)
+	    			   {
+	    				   //System.out.println("r1: "+r1 + "c1: "+c1);
+	    				   sum+=avgd[r1][c1];
+	    			   }
+	    		   }
+	    		   resized[r][c]=sum/(10*10);
+	    		   starty=y;
+	    		   y+=10;
+	    		  // System.out.println("startx: " +startx + "x: "+ x+ "starty: "+ starty + "y: "+y);
+	    		   
+	    	   }
+	    	   startx=x;
+			   x+=10; 
+			   starty=0;
+			   y=10;
+			  // System.out.println("startx: " +startx + "x: "+ x+ "starty: "+ starty + "y: "+y);
+			  
+		
+			  
+	       }
+	       
+	    
+		  
+		  
+	      
+	      return resized;
+	   }
    
-      for(int z=0; z<149; z++) 
-      {
-         Double[][] difference = new Double[175][175];
-        Double[][] m1 = sections.get(z);
-        Double[][] m2=sections.get(z+1);
-         for(int x=0; x<m1.length; x++)
-         {
-            for(int y=0; y<m1[0].length; y++)
-            {
-               difference[x][y]=m1[x][y]-m2[x][y];
-            }
-         }
-         diff.add(difference);
-      }
-      Double[][] avgd = new Double[175][175];
-      for(int r=0; r<175; r++)
-      {
-         for(int c=0; c<175; c++)
-         {
-            double sum = 0;
-            for(int i=0; i<149; i++)
-            {
-               Double[][] matrix = diff.get(i);
-               sum+=matrix[r][c];
-            }
-            avgd[r][c]=sum/149;   
-         }
-      }   
-                           
-      return avgd;
-   }
-   */
-   
-  public void fill(Double[][] section, Double[][][] movement,int z)
-   {  
-      for(int x=232; x<407; x++) //rows, 5/2=320, 175/2=88 320+88=407
-         {      
-            for(int y=152; y<327; y++)
-            {
-               section[x-232][y-152]=movement[z][x][y];        
-            }
-         }
-}   
-   /*
-   public Double[][] task3()
+  
+
+    public Double[][] task3()//add int action //only aggregate if there's a frame to aggregate
    {
       Double[][][] mat1 = getmat();
       ArrayList<Double[][]> diff = new ArrayList<Double[][]>();
-      ArrayList<Integer> rowcor = new ArrayList<Integer>();
-      ArrayList<Integer> colcor = new ArrayList<Integer>();
-      for(int x=0; x<175; x++)
+
+      int z=0;
+      int actualDiffFrames=0; //x actual frames
+      while(mat1[z+1][0][0]!=null)
       {
-         int r = (int)(Math.random()*639+1);
-         rowcor.add(r);
-         int c = (int)(Math.random()*479 +1);
-         colcor.add(c);
-      }   
-      Double[][][]sections = new Double[1][175][175];
-      //ArrayList<Double[][]> sections = new ArrayList<Double[][]>();
-      for(int z=0; z<150; z++) 
-      {
-         Double[][] section = new Double[175][175]; //picked 1 percent of points (30720)
-         for(int x=0; x<175; x++)
+    	  actualDiffFrames++;
+    	  Double[][] difference = new Double[nCoordsSize][nCoordsSize];
+
+         for(int x=0; x<nCoordsSize; x++)
          {
-            for(int y=0; y<175; y++)
+            for(int y=0; y<nCoordsSize; y++)
             {
-               int r = rowcor.get(x);
-               int c = colcor.get(y);
-               section[x][y]=mat1[z][r][c];
-            }
-         }
-         sections[z]=section;  //create new 3d matrix of 175 by 175 by 1 which has the 10% of pts from each frame
-      }               
-      for(int z=0; z<149; z++) 
-      {
-         Double[][] difference = new Double[175][175];
-         for(int x=0; x<sections.length; x++)
-         {
-            for(int y=0; y<sections[0].length; y++)
-            {
-               difference[x][y]=sections[z][x][y]-sections[z+1][x][y];
+            	difference[x][y]=Math.abs(mat1[z+1][x][y]-mat1[z][x][y]);
             }
          }
          diff.add(difference);
+        z++; 
       }
-      Double[][] avgd = new Double[175][175];
-      for(int r=0; r<175; r++)
+      Double[][] avgd = new Double[nCoordsSize][nCoordsSize];
+      for(int r=0; r<nCoordsSize; r++)
       {
-         for(int c=0; c<175; c++)
+         for(int c=0; c<nCoordsSize; c++)
          {
             double sum = 0;
-            for(int i=0; i<149; i++)
+            for(int i=0; i<actualDiffFrames; i++)
             {
                Double[][] matrix = diff.get(i);
                sum+=matrix[r][c];
             }
-            avgd[r][c]=sum/149;   
+             avgd[r][c]=sum/actualDiffFrames;
          }
       }   
                            
       return avgd;
    }
-   */ 
+   
  public Double[][][] getmat()
    {
       return motion;
    }
 public int getS()
    {
-      return finger;
+      return action;
    }         
-  
+  public String toString2()
+  {
+	  	String blah="";
+	  
+	  		for(int x=0; x<nCoordsSize; x++)
+	  		{
+	  			for(int y=0; y<nCoordsSize; y++)
+	  			{
+	  				blah+=motion[1][x][y];
+	  			}
+	  		}
+	  	
+	  return blah;
+  }
 
 }        
       
