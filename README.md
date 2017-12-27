@@ -19,7 +19,9 @@ Prosthetic Classification Part 1 (Classification Metrics when classifying index 
 
 Prosthetic Classification Part 2 (Classification Metrics when classifying iterations of 11 complex motions on the Raspberry Pi)
 -Used the same format of converting ultrasound motion data into "Instancem" and "Instancemtest" types for the new set of complex motions
--Decreased the overall memory usage (processing requirements) experimenting with the amout of data necessary for the classification algorithm to effectively learn and accurately classify the more complex motions.
+-Decreased the overall memory usage (processing requirements) experimenting with the amout of data necessary for the classification algorithm to effectively learn and accurately classify the more complex & diverse motions.
 Methods of correlation
 1) Block-mean correlation: Similar to above
-2) Region-based correlation: 
+2) Region-based correlation: Used a block-mean based system to minimize data points and then conducted a correlation on the centermost new 10% points
+3) Hamming Distance: Conducted KNN via the hamming distance technique with a 50% threshold
+4) Random Hashing: Similar to Above
